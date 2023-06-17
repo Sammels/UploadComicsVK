@@ -20,9 +20,13 @@ def download_image():
     """Function download image"""
     pass
 
+
+
 if __name__ == "__main__":
     load_dotenv()
     download_path = os.getenv("DOWNLOAD_PATH")
+    vk_client_id = os.getenv("CLIENT_ID")
+    vk_access_token = os.getenv("APPLICATION_VK_TOKEN")
     Path(download_path).mkdir(parents=True, exist_ok=True)
     random_comics_number = randint(1, 2788)
 
@@ -52,6 +56,7 @@ if __name__ == "__main__":
     download_comics.raise_for_status()
     with open(f'Files/comics{random_comics_number}{extension}', 'wb') as file:
         file.write(download_comics.content)
+
 
 
 
