@@ -91,13 +91,10 @@ if __name__ == "__main__":
 
     if 221144900 in group_number['response']['items']:
         group = 221144900
-    print(group)
 
     comics_information = download_comics()
-    print(comics_information)
 
     test_information = get_wall_vk_upload_server(group, vk_access_token)
-    print(test_information)
     test_info_response = test_information.get('response')
     url_for_upload = test_info_response.get("upload_url")
 
