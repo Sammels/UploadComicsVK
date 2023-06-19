@@ -1,47 +1,15 @@
 import os
 import requests
-from random import randint
 from pathlib import Path
 
 from dotenv import load_dotenv
-from urllib.parse import urlsplit
+
+import python_utils
 
 
-
-def get_file_extension(url: str) -> str:
-    """Function get http link and return file extension"""
-    url = urlsplit(url)[2]
-    template = os.path.splitext(url)
-    file_link, *extension = template
-    return extension[0]
-
-
-def download_image():
-    """Function download image"""
-    random_comics_number = randint(1, 2788)
-    comics_url = "https://c.xkcd.com/random/comic/"
-    test_url = f"https://xkcd.com/{random_comics_number}/info.0.json"
-
-    response = requests.get(test_url)
-    response.raise_for_status()
-    comics = response.json()
-    comics_image_link = comics.get('img')
-    alt_comics_name = comics.get('alt')
-    print(alt_comics_name)
-
-    # extension
-    extension = get_file_extension(comics_image_link)
-
-    # Download image
-    download_comics = requests.get(comics_image_link)
-    download_comics.raise_for_status()
-    with open(f'Files/comics{random_comics_number}{extension}', 'wb') as file:
-        file.write(download_comics.content)
-
-
-def test_vk_post(vk_client_id, vk_access_token):
-    vk_api = "https://api.vk.com/method/"
-    group_get_method = vk_api + "groups.get"
+def get_groups_vk(vk_client_id: str, vk_access_token: str) -> str:
+    """Function POST request to VK API used GROUP.GET method """
+    vk_api_group_get_method = "https://api.vk.com/method/groups.get"
 
     headers = {
         "Authorization": f"Bearer {vk_access_token}"
@@ -50,12 +18,28 @@ def test_vk_post(vk_client_id, vk_access_token):
         "user_ids": vk_client_id,
         "v": 5.131
     }
-    response = requests.post(group_get_method, headers=headers, params=params)
+    response = requests.post(vk_api_group_get_method, headers=headers, params=params)
     response.raise_for_status()
 
     text = response.json()
     return text
 
+
+def get_wall_vk_upload_server(vk_client_id: str, vk_access_token: str) -> str:
+    """Function POST request to VK API used PHOTO.WALL.UPLOAD.SERVER method """
+    vk_api_photo_wall_upload_server = "https://api.vk.com/method/photos.getWallUploadServer"
+    headers = {
+        "Authorization": f"Bearer {vk_access_token}"
+    }
+    params = {
+        "user_ids": vk_client_id,
+        "v": 5.131
+    }
+    response = requests.post(vk_api_photo_wall_upload_server, headers=headers, params=params)
+    response.raise_for_status()
+
+    text = response.json()
+    return text
 
 
 if __name__ == "__main__":
@@ -65,9 +49,14 @@ if __name__ == "__main__":
     vk_access_token = os.getenv("APPLICATION_VK_TOKEN")
     Path(download_path).mkdir(parents=True, exist_ok=True)
 
-    test1 = test_vk_post(vk_client_id, vk_access_token)
-    print(test1)
+    test1 = get_groups_vk(vk_client_id, vk_access_token)
+    test_groups = test1['response']['items']
 
+    comics_information = python_utils.download_comics()
+    print(comics_information)
 
-
-
+    # test_information = get_wall_vk_upload_server(vk_client_id, vk_access_token)
+    # print(test_information)
+    # test_info_response = test_information.get('response')
+    # print()
+    # print(test_info_response.get("album_id"), test_info_response.get("upload_url"), test_info_response.get("user_id"))
