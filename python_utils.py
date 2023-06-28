@@ -3,7 +3,7 @@ import requests
 
 from random import randint
 from urllib.parse import urlsplit
-
+from shutil import rmtree
 
 def get_file_extension(url: str) -> str:
     """Function get http link and return file extension"""
@@ -23,7 +23,6 @@ def download_comics() -> dict[str, str]:
     comics = response.json()
     comics_image_link = comics.get('img')
     alt_comics_name = comics.get('alt')
-    print(alt_comics_name)
 
     # extension
     extension = get_file_extension(comics_image_link)
@@ -37,3 +36,6 @@ def download_comics() -> dict[str, str]:
     comics_name = f"comics_{random_comics_number}{extension}"
 
     return {"name": comics_name, "alternative_name": alt_comics_name}
+
+def remove_file_afret_download():
+    rmtree("Files/")
