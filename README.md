@@ -6,7 +6,23 @@
 
 Установка происходит в несколько этапов.
 1. Клонируете этот репозиторий.
-2. 
+2. Использкй модуль `venv` установить виртуальное окружение
+```shell
+pytnon3 -m venv env
+```
+3. Далее необходимо установить библиотеки.
+```shell
+pip3 install -r requrements.txt
+```
+4. Так же нужно создать файл `.env`, и заполнить его
+```text
+DOWNLOAD_PATH="path where"
+CLIENT_ID="personal id"
+ACCESS_TOKEN="token vk"
+APPLICATION_VK_TOKEN="token vk application"
+```
+5. пройти по [ВК АПИ](https://dev.vk.com/), чтобы ознакомится от куда взять необходимые даные.
+
 
 ### Цель проекта
 
