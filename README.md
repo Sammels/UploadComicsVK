@@ -10,18 +10,34 @@
 ```shell
 pytnon3 -m venv env
 ```
-3. Далее необходимо установить библиотеки.
+
+### Установка необходимых библиотек.
 ```shell
 pip3 install -r requrements.txt
 ```
-4. Так же нужно создать файл `.env`, и заполнить его
+
+### Создание приложения
+Создать приложение можно в разделе Мои приложения. Ссылка на него в шапке страницы.
+[ВК для разработчиков](https://dev.vk.com/).
+
+### Получение ключа доступа пользователя
+[Implicit Flow для получения ключа доступа пользователя](https://vk.com/dev/implicit_flow_user).
+
+Необходимые права: `photos`, `groups`, `wall` и `offline`.
+
+### Создание окружения 
+Так же нужно создать файл `.env`, и заполнить его
 ```text
-DOWNLOAD_PATH="path where"
-CLIENT_ID="personal id"
-ACCESS_TOKEN="token vk"
-APPLICATION_VK_TOKEN="token vk application"
+DOWNLOAD_PATH="Путь куда будет сохранятся комикс"
+CLIENT_ID="ID вашего приложения ВКонтакте"
+ACCESS_TOKEN="Токен доступа к ВК апи"
+APPLICATION_VK_TOKEN="Токен приложения"
 ```
-5. пройти по [ВК АПИ](https://dev.vk.com/), чтобы ознакомится от куда взять необходимые даные.
+
+### Запуск скрипта
+```shell
+python3 download_comics.py
+```
 
 
 ### Цель проекта
