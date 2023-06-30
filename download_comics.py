@@ -10,21 +10,6 @@ VK_API_PHOTO_WALL_UPLOAD_SERVER = "https://api.vk.com/method/photos.getWallUploa
 VK_API_LOAD_PHOTO = "https://api.vk.com/method/photos.saveWallPhoto"
 VK_API_LOAD_WALL_PHOTO = "https://api.vk.com/method/wall.post"
 
-def get_groups_vk(vk_client_id: str, vk_access_token: str) -> str:
-    """Function POST request to VK API used GROUP.GET method """
-
-    headers = {
-        "Authorization": f"Bearer {vk_access_token}"
-    }
-    params = {
-        "user_ids": vk_client_id,
-        "v": 5.131
-    }
-    response = requests.post(VK_API_GROUP_GET_METHOD, headers=headers, params=params)
-    response.raise_for_status()
-    text = response.json()
-    return text
-
 
 def get_wall_vk_upload_server(group_id: str, vk_access_token: str) -> str:
     """Function POST request to VK API used PHOTO.WALL.UPLOAD.SERVER method """
@@ -98,10 +83,7 @@ if __name__ == "__main__":
     vk_access_token = os.getenv("APPLICATION_VK_TOKEN")
     Path(download_path).mkdir(parents=True, exist_ok=True)
 
-    group_number = get_groups_vk(vk_client_id, vk_access_token)
-
-    if 221144900 in group_number['response']['items']:
-        group = 221144900
+    group = os.getenv("GROUP_ID")
 
     comics_information = download_comics()
 
