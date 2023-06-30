@@ -34,7 +34,7 @@ ACCESS_TOKEN="Токен доступа к ВК апи"
 APPLICATION_VK_TOKEN="Токен приложения"
 ```
 
-### Запуск скрипта
+## Запуск скрипта
 ```shell
 python3 download_comics.py
 ```
