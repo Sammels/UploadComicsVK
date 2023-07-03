@@ -1,9 +1,10 @@
 import os
 import requests
+import logging
 from pathlib import Path
 from dotenv import load_dotenv
-from python_utils import download_comics, remove_file_afret_download
-
+from shutil import rmtree
+from python_utils import download_comics
 
 VK_API_GROUP_GET_METHOD = "https://api.vk.com/method/groups.get"
 VK_API_PHOTO_WALL_UPLOAD_SERVER = "https://api.vk.com/method/photos.getWallUploadServer"
@@ -20,24 +21,35 @@ def get_wall_vk_upload_server(group_id: str, vk_access_token: str) -> str:
         "group_id": group_id,
         "v": 5.131
     }
+
     response = requests.post(VK_API_PHOTO_WALL_UPLOAD_SERVER, headers=headers, params=params)
     response.raise_for_status()
-    text = response.json()
-    return text
+    try:
+        upload_url = response.json().get("response").get("upload_url")
+    except:
+        error_code = response.json().get('error').get('error_code')
+        error_message = response.json().get('error').get('error_msg')
+        logging.warning(msg=f"\nerror code: {error_code} '\n'{error_message}")
+        raise
+
+    return upload_url
 
 
 def upload_photo_to_vk(url_link: str, filename: str) -> str:
     """Function load photo to vk server and return dict photo info"""
-    with open(f"Files/{filename}", 'rb') as file:
+    file_dir = Path.cwd() / 'Files' / filename
+    with open(f"{file_dir}", 'rb') as file:
         url = url_link
         files = {
             'photo': file,
         }
         response = requests.post(url, files=files)
-        response.raise_for_status()
-        photo_load_info = response.json()
+    response.raise_for_status()
+    photo_load_info = response.json()
+    requests.HTTPError()
+    logging.info(msg=f"статус код upload_photo_to_vk:  {response.status_code}")
 
-        return photo_load_info
+    return photo_load_info
 
 
 def photo_save_wall_vk(group_id, photo_info, vk_access_token):
@@ -54,12 +66,13 @@ def photo_save_wall_vk(group_id, photo_info, vk_access_token):
 
     response = requests.post(VK_API_LOAD_PHOTO, params=params, headers=header)
     response.raise_for_status()
-    save_photo_wall_info = response.json()
-    return save_photo_wall_info
+    upload_photo_to_wall_server = response.json()
+    requests.HTTPError()
+    logging.info(msg=f"статус код photo_save_wall_vk:  {response.status_code}")
+    return upload_photo_to_wall_server
 
 
-def public_photo_to_group_vk(group_id, attachments, vk_access_token, message):
-
+def post_photo_to_wall_vk(group_id, attachments, vk_access_token, message):
     header = {
         "Authorization": f"Bearer {vk_access_token}"
     }
@@ -72,8 +85,10 @@ def public_photo_to_group_vk(group_id, attachments, vk_access_token, message):
     }
     vk_server_response = requests.get(VK_API_LOAD_WALL_PHOTO, headers=header, params=params)
     vk_server_response.raise_for_status()
-    awesome_style = vk_server_response.json()
-    return awesome_style
+    public_post_info = vk_server_response.json()
+    requests.HTTPError()
+    logging.info(msg=f"статус код post_photo_to_wall_vk:  {vk_server_response.status_code}")
+    return public_post_info
 
 
 if __name__ == "__main__":
@@ -85,18 +100,22 @@ if __name__ == "__main__":
 
     group = os.getenv("GROUP_ID")
 
-    comics_information = download_comics()
+    try:
+        comics_name, comics_alt_name = download_comics()
+    except:
+        del_dir = Path.cwd() / 'Files'
+        rmtree(del_dir)
 
-    upload_photo_to_server = get_wall_vk_upload_server(group, vk_access_token)
-    test_info_response = upload_photo_to_server.get('response')
-    url_for_upload = test_info_response.get("upload_url")
+    photo_to_server = get_wall_vk_upload_server(group, vk_access_token)
 
-    photo_info = upload_photo_to_vk(url_for_upload,  comics_information['name'])
-    load_photo_to_server_vk = photo_save_wall_vk(group, photo_info, vk_access_token)
-    vk_server_response = load_photo_to_server_vk.get('response')
+    photo_info = upload_photo_to_vk(photo_to_server, comics_name)
+    photo_to_server_vk = photo_save_wall_vk(group, photo_info, vk_access_token)
+    vk_server_response = photo_to_server_vk.get('response')
     owner_id = vk_server_response[0].get("owner_id")
     media_id = vk_server_response[0].get("id")
 
     attachments = f"photo{owner_id}_{media_id}"
-    public_photo_to_group_vk(group, attachments, vk_access_token, comics_information['alternative_name'])
-    remove_file_afret_download()
+    post_photo_to_wall_vk(group, attachments, vk_access_token, comics_alt_name)
+
+    del_dir = Path.cwd() / 'Files'
+    rmtree(del_dir)
