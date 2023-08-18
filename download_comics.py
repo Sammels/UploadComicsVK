@@ -46,7 +46,6 @@ def upload_photo_to_vk(url_link: str, filename: str) -> str:
         response = requests.post(url, files=files)
     response.raise_for_status()
     photo_load_info = response.json()
-    requests.HTTPError()
     logging.info(msg=f"статус код upload_photo_to_vk:  {response.status_code}")
 
     return photo_load_info
@@ -67,7 +66,6 @@ def photo_save_wall_vk(group_id, photo_info, vk_access_token):
     response = requests.post(VK_API_LOAD_PHOTO, params=params, headers=header)
     response.raise_for_status()
     upload_photo_to_wall_server = response.json()
-    requests.HTTPError()
     logging.info(msg=f"статус код photo_save_wall_vk:  {response.status_code}")
     return upload_photo_to_wall_server
 
@@ -86,7 +84,6 @@ def post_photo_to_wall_vk(group_id, attachments, vk_access_token, message):
     vk_server_response = requests.get(VK_API_LOAD_WALL_PHOTO, headers=header, params=params)
     vk_server_response.raise_for_status()
     public_post_info = vk_server_response.json()
-    requests.HTTPError()
     logging.info(msg=f"статус код post_photo_to_wall_vk:  {vk_server_response.status_code}")
     return public_post_info
 
