@@ -31,6 +31,7 @@ pip3 install -r requrements.txt
 DOWNLOAD_PATH="Путь куда будет сохранятся комикс"
 ACCESS_TOKEN="Токен доступа к ВК апи"
 APPLICATION_VK_TOKEN="Токен приложения"
+GROUP_ID="ID группы в которой будет публикация"
 ```
 
 ## Запуск скрипта

@@ -1,9 +1,13 @@
 import os
-import requests
-import logging
-from pathlib import Path
-from dotenv import load_dotenv
 from shutil import rmtree
+from pathlib import Path
+import logging
+
+import requests
+
+
+from dotenv import load_dotenv
+
 from python_utils import download_comics
 
 VK_API_GROUP_GET_METHOD = "https://api.vk.com/method/groups.get"
