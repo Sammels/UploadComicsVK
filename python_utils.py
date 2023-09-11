@@ -26,8 +26,8 @@ def download_comics() -> tuple[str, Any]:
     response = requests.get(test_url)
     response.raise_for_status()
     comics = response.json()
-    comics_image_link = comics.get('img')
-    alt_comics_name = comics.get('alt')
+    comics_image_link = comics.get("img")
+    alt_comics_name = comics.get("alt")
 
     # extension
     extension = get_file_extension(comics_image_link)
@@ -35,8 +35,8 @@ def download_comics() -> tuple[str, Any]:
     # Download image
     download_comics = requests.get(comics_image_link)
     download_comics.raise_for_status()
-    file_dir = Path.cwd() / 'Files' / f"comics_{random_comics_number}{extension}"
-    with open(file_dir, 'wb') as file:
+    file_dir = Path.cwd() / "Files" / f"comics_{random_comics_number}{extension}"
+    with open(file_dir, "wb") as file:
         file.write(download_comics.content)
 
     comics_name = f"comics_{random_comics_number}{extension}"
