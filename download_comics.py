@@ -91,7 +91,6 @@ def post_photo_to_wall_vk(group_id, attachments, vk_access_token, message):
 if __name__ == "__main__":
     load_dotenv()
     download_path = os.getenv("DOWNLOAD_PATH")
-    vk_client_id = os.getenv("CLIENT_ID")
     vk_access_token = os.getenv("APPLICATION_VK_TOKEN")
     Path(download_path).mkdir(parents=True, exist_ok=True)
 

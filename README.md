@@ -29,7 +29,6 @@ pip3 install -r requrements.txt
 Так же нужно создать файл `.env`, и заполнить его
 ```text
 DOWNLOAD_PATH="Путь куда будет сохранятся комикс"
-CLIENT_ID="ID вашего приложения ВКонтакте"
 ACCESS_TOKEN="Токен доступа к ВК апи"
 APPLICATION_VK_TOKEN="Токен приложения"
 ```
