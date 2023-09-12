@@ -29,10 +29,8 @@ def download_comics() -> tuple[str, Any]:
     comics_image_link = comics.get("img")
     alt_comics_name = comics.get("alt")
 
-    # extension
     extension = get_file_extension(comics_image_link)
 
-    # Download image
     download_comics = requests.get(comics_image_link)
     download_comics.raise_for_status()
     file_dir = Path.cwd() / "Files" / f"comics_{random_comics_number}{extension}"

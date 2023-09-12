@@ -14,7 +14,7 @@ VK_API_LOAD_WALL_PHOTO = "https://api.vk.com/method/wall.post"
 
 
 def get_wall_vk_upload_server(group_id: str, vk_access_token: str) -> str:
-    """Function POST request to VK API used PHOTO.WALL.UPLOAD.SERVER method"""
+    """Function POST request to VK API used PHOTO.WALL.UPLOAD.SERVER method."""
     headers = {"Authorization": f"Bearer {vk_access_token}"}
     params = {"group_id": group_id, "v": 5.131}
 
@@ -34,8 +34,8 @@ def get_wall_vk_upload_server(group_id: str, vk_access_token: str) -> str:
     return upload_url
 
 
-def upload_photo_to_vk(url_link: str, filename: str) -> str:
-    """Function load photo to vk server and return dict photo info"""
+def upload_photo_to_vk(url_link: str, filename: str) -> dict:
+    """Function load photo to vk server and return dict photo info."""
     file_dir = Path.cwd() / "Files" / filename
     with open(f"{file_dir}", "rb") as file:
         url = url_link
@@ -68,6 +68,7 @@ def photo_save_wall_vk(group_id, photo_server_id,photo_full_information, photo_h
 
 
 def post_photo_to_wall_vk(group_id, attachments, vk_access_token, message):
+    """Posting Photo, message, in group vk."""
     header = {"Authorization": f"Bearer {vk_access_token}"}
     params = {
         "owner_id": f"-{group_id}",
@@ -100,10 +101,10 @@ if __name__ == "__main__":
 
     photo_to_server = get_wall_vk_upload_server(group, vk_access_token)
 
-    photo_info = upload_photo_to_vk(photo_to_server, comics_name)
-    photo_server_id = photo_info.get("server")
-    photo_full_information = photo_info.get("photo")
-    photo_hash = photo_info.get("hash")
+    photo_ = upload_photo_to_vk(photo_to_server, comics_name)
+    photo_server_id = photo_.get("server")
+    photo_full_information = photo_.get("photo")
+    photo_hash = photo_.get("hash")
 
     photo_to_server_vk = photo_save_wall_vk(group, photo_server_id,photo_full_information,
                                             photo_hash, vk_access_token)
