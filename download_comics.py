@@ -2,12 +2,9 @@ import os
 from shutil import rmtree
 from pathlib import Path
 import logging
-
 import requests
 
-
 from dotenv import load_dotenv
-
 from python_utils import download_comics
 
 VK_API_GROUP_GET_METHOD = "https://api.vk.com/method/groups.get"
@@ -28,8 +25,9 @@ def get_wall_vk_upload_server(group_id: str, vk_access_token: str) -> str:
     try:
         upload_url = response.json().get("response").get("upload_url")
     except:
-        error_code = response.json().get("error").get("error_code")
-        error_message = response.json().get("error").get("error_msg")
+        error_response = response.json().get("error")
+        error_code = error_response.get("error_code")
+        error_message = error_response.get("error_msg")
         logging.warning(msg=f"\nerror code: {error_code} '\n'{error_message}")
         raise
 
@@ -52,13 +50,13 @@ def upload_photo_to_vk(url_link: str, filename: str) -> str:
     return photo_load_info
 
 
-def photo_save_wall_vk(group_id, photo_info, vk_access_token):
+def photo_save_wall_vk(group_id, photo_server_id,photo_full_information, photo_hash, vk_access_token):
     header = {"Authorization": f"Bearer {vk_access_token}"}
     params = {
         "group_id": group_id,
-        "server": photo_info.get("server"),
-        "photo": photo_info.get("photo"),
-        "hash": photo_info.get("hash"),
+        "server": photo_server_id,
+        "photo": photo_full_information,
+        "hash": photo_hash,
         "v": 5.131,
     }
 
@@ -95,18 +93,20 @@ if __name__ == "__main__":
     vk_access_token = os.getenv("APPLICATION_VK_TOKEN")
     Path(download_path).mkdir(parents=True, exist_ok=True)
 
-    group = os.getenv("GROUP_ID")
+    group = os.getenv("VK_GROUP_ID")
 
-    try:
-        comics_name, comics_alt_name = download_comics()
-    except:
-        del_dir = Path.cwd() / "Files"
-        rmtree(del_dir)
+    comics_name, comics_alt_name = download_comics()
+
 
     photo_to_server = get_wall_vk_upload_server(group, vk_access_token)
 
     photo_info = upload_photo_to_vk(photo_to_server, comics_name)
-    photo_to_server_vk = photo_save_wall_vk(group, photo_info, vk_access_token)
+    photo_server_id = photo_info.get("server")
+    photo_full_information = photo_info.get("photo")
+    photo_hash = photo_info.get("hash")
+
+    photo_to_server_vk = photo_save_wall_vk(group, photo_server_id,photo_full_information,
+                                            photo_hash, vk_access_token)
     vk_server_response = photo_to_server_vk.get("response")
     owner_id = vk_server_response[0].get("owner_id")
     media_id = vk_server_response[0].get("id")
