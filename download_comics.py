@@ -22,14 +22,7 @@ def get_wall_vk_upload_server(group_id: str, vk_access_token: str) -> str:
         VK_API_PHOTO_WALL_UPLOAD_SERVER, headers=headers, params=params
     )
     response.raise_for_status()
-    try:
-        upload_url = response.json().get("response").get("upload_url")
-    except:
-        error_response = response.json().get("error")
-        error_code = error_response.get("error_code")
-        error_message = error_response.get("error_msg")
-        logging.warning(msg=f"\nerror code: {error_code} '\n'{error_message}")
-        raise
+    upload_url = response.json().get("response").get("upload_url")
 
     return upload_url
 
@@ -50,7 +43,13 @@ def upload_photo_to_vk(url_link: str, filename: str) -> dict:
     return photo_load_info
 
 
-def photo_save_wall_vk(group_id, photo_server_id,photo_full_information, photo_hash, vk_access_token):
+def photo_save_wall_vk(
+    group_id: str,
+    photo_server_id: int,
+    photo_full_information: str,
+    photo_hash: str,
+    vk_access_token: str,
+):
     header = {"Authorization": f"Bearer {vk_access_token}"}
     params = {
         "group_id": group_id,
@@ -87,6 +86,16 @@ def post_photo_to_wall_vk(group_id, attachments, vk_access_token, message):
     )
     return public_post_info
 
+class VkApiError(Exception):
+
+    def __init__(self, error_code, error_message):
+        self.error_code = error_code
+        self.error_message = error_message
+        super().__init__(f'VK API error: {self.error_code}: {self.error_message}')
+def check_for_vk_api_errors(response):
+    if 'error' in response:
+        raise VkApiError(response['error']['error_code'], response['error']['error_msg'])
+
 
 if __name__ == "__main__":
     load_dotenv()
@@ -95,25 +104,29 @@ if __name__ == "__main__":
     Path(download_path).mkdir(parents=True, exist_ok=True)
 
     group = os.getenv("VK_GROUP_ID")
+    try:
+        comics_name, comics_alt_name = download_comics()
 
-    comics_name, comics_alt_name = download_comics()
+        photo_to_server = get_wall_vk_upload_server(group, vk_access_token)
 
+        photo_ = upload_photo_to_vk(photo_to_server, comics_name)
+        photo_server_id = photo_.get("server")
+        photo_full_information = photo_.get("photo")
+        photo_hash = photo_.get("hash")
 
-    photo_to_server = get_wall_vk_upload_server(group, vk_access_token)
+        photo_to_server_vk = photo_save_wall_vk(
+            group, photo_server_id, photo_full_information, photo_hash, vk_access_token
+        )
+        vk_server_response = photo_to_server_vk.get("response")
+        owner_id = vk_server_response[0].get("owner_id")
+        media_id = vk_server_response[0].get("id")
 
-    photo_ = upload_photo_to_vk(photo_to_server, comics_name)
-    photo_server_id = photo_.get("server")
-    photo_full_information = photo_.get("photo")
-    photo_hash = photo_.get("hash")
+        attachments = f"photo{owner_id}_{media_id}"
+        post_photo_to_wall_vk(group, attachments, vk_access_token, comics_alt_name)
 
-    photo_to_server_vk = photo_save_wall_vk(group, photo_server_id,photo_full_information,
-                                            photo_hash, vk_access_token)
-    vk_server_response = photo_to_server_vk.get("response")
-    owner_id = vk_server_response[0].get("owner_id")
-    media_id = vk_server_response[0].get("id")
+    except VkApiError as error:
+        print(f"Ошибка VK API (код ошибки - {error.error_code}): {error.error_message}")
 
-    attachments = f"photo{owner_id}_{media_id}"
-    post_photo_to_wall_vk(group, attachments, vk_access_token, comics_alt_name)
-
-    del_dir = Path.cwd() / "Files"
-    rmtree(del_dir)
+    finally:
+        del_dir = Path.cwd() / "Files"
+        rmtree(del_dir)
